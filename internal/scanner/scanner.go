@@ -9,6 +9,7 @@ type state int
 
 const (
 	INITIAL state = iota
+	INITIAL_DATA_SEEN
 	IN_VALUE
 	IN_VALUE_RELEASE_SEEN
 )
@@ -86,7 +87,7 @@ func (s *Scanner) scanNext() error {
 
 			s.tokens = append(s.tokens, ScannerToken{tType: UNA_SEGMENT, value: string(value), pos: pos, err: err})
 			s.format = Format{componentDataElementSeperator: value[3], dataElementSeperator: value[4], decimalMark: value[5], releaseCharacter: value[6], repetitionSeperator: value[7], segmentTerminator: value[8]}
-			s.state = INITIAL
+			s.state = INITIAL_DATA_SEEN
 			return nil
 		}
 	}
@@ -100,7 +101,7 @@ func (s *Scanner) scanNext() error {
 		}
 
 		switch s.state {
-		case INITIAL:
+		case INITIAL, INITIAL_DATA_SEEN:
 			if err == io.EOF {
 				s.tokens = append(s.tokens, ScannerToken{tType: EOF, value: "", pos: pos, err: nil})
 				return nil
