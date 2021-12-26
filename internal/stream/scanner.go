@@ -1,7 +1,8 @@
-package scanner
+package stream
 
 import (
 	"fmt"
+	"github.com/cbuschka/go-edi/stream/types"
 	"io"
 )
 
@@ -35,7 +36,7 @@ func (s *Scanner) All() ([]ScannerToken, error) {
 
 		tokens = append(tokens, token)
 
-		if token.tType == EOF {
+		if token.tType == types.EOF {
 			break
 		}
 	}
@@ -85,7 +86,7 @@ func (s *Scanner) scanNext() error {
 				return err
 			}
 
-			s.tokens = append(s.tokens, ScannerToken{tType: UNA_SEGMENT, value: string(value), pos: pos, err: err})
+			s.tokens = append(s.tokens, ScannerToken{tType: types.UNA_SEGMENT, value: string(value), pos: pos, err: err})
 			s.format = Format{componentDataElementSeperator: value[3], dataElementSeperator: value[4], decimalMark: value[5], releaseCharacter: value[6], repetitionSeperator: value[7], segmentTerminator: value[8]}
 			s.state = INITIAL_DATA_SEEN
 			return nil
@@ -96,33 +97,33 @@ func (s *Scanner) scanNext() error {
 	for {
 		b, err := s.scanRd.PeekRune(0)
 		if err != nil && err != io.EOF {
-			s.tokens = append(s.tokens, ScannerToken{tType: ERROR, value: "", pos: pos, err: err})
+			s.tokens = append(s.tokens, ScannerToken{tType: types.ERROR, value: "", pos: pos, err: err})
 			return nil
 		}
 
 		switch s.state {
 		case INITIAL, INITIAL_DATA_SEEN:
 			if err == io.EOF {
-				s.tokens = append(s.tokens, ScannerToken{tType: EOF, value: "", pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: types.EOF, value: "", pos: pos, err: nil})
 				return nil
 			} else if b == s.format.releaseCharacter {
 				_, _ = s.scanRd.ReadRune()
 				s.state = IN_VALUE_RELEASE_SEEN
 			} else if b == s.format.segmentTerminator {
 				b, _ := s.scanRd.ReadRune()
-				s.tokens = append(s.tokens, ScannerToken{tType: SEGMENT_TERMINATOR, value: string(b), pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: types.SEGMENT_TERMINATOR, value: string(b), pos: pos, err: nil})
 				return nil
 			} else if b == s.format.componentDataElementSeperator {
 				b, _ := s.scanRd.ReadRune()
-				s.tokens = append(s.tokens, ScannerToken{tType: COMPONENT_DATA_ELEMENT_SEPERATOR, value: string(b), pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: types.COMPONENT_DATA_ELEMENT_SEPERATOR, value: string(b), pos: pos, err: nil})
 				return nil
 			} else if b == s.format.dataElementSeperator {
 				b, _ := s.scanRd.ReadRune()
-				s.tokens = append(s.tokens, ScannerToken{tType: DATA_ELEMENT_SEPERATOR, value: string(b), pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: types.DATA_ELEMENT_SEPERATOR, value: string(b), pos: pos, err: nil})
 				return nil
 			} else if b == s.format.repetitionSeperator {
 				b, _ := s.scanRd.ReadRune()
-				s.tokens = append(s.tokens, ScannerToken{tType: REPETITION_SEPERATOR, value: string(b), pos: pos, err: fmt.Errorf("eof after release char")})
+				s.tokens = append(s.tokens, ScannerToken{tType: types.REPETITION_SEPERATOR, value: string(b), pos: pos, err: fmt.Errorf("eof after release char")})
 				return nil
 			} else {
 				b, _ := s.scanRd.ReadRune()
@@ -135,7 +136,7 @@ func (s *Scanner) scanNext() error {
 				b == s.format.componentDataElementSeperator ||
 				b == s.format.segmentTerminator {
 				s.state = INITIAL
-				s.tokens = append(s.tokens, ScannerToken{tType: VALUE, value: string(buf), pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: types.VALUE, value: string(buf), pos: pos, err: nil})
 				return nil
 			} else if b == s.format.releaseCharacter {
 				_, _ = s.scanRd.ReadRune()
@@ -146,7 +147,7 @@ func (s *Scanner) scanNext() error {
 			}
 		case IN_VALUE_RELEASE_SEEN:
 			if err == io.EOF {
-				s.tokens = append(s.tokens, ScannerToken{tType: ERROR, value: "", pos: pos, err: fmt.Errorf("eof after release char")})
+				s.tokens = append(s.tokens, ScannerToken{tType: types.ERROR, value: "", pos: pos, err: fmt.Errorf("eof after release char")})
 				return nil
 			} else {
 				_, _ = s.scanRd.ReadRune()
