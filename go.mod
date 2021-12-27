@@ -1,4 +1,4 @@
-module github.com/cbuschka/go-edi
+module github.com/edilib/go-edi
 
 go 1.16
 

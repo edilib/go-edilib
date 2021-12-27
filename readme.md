@@ -19,6 +19,6 @@
 
 ## License
 
-Copyright (c) 2021 by [Cornelius Buschka](https://github.com/cbuschka).
+Copyright (c) 2021 by [Cornelius Buschka](https://github.com/edilib).
 
 [Apache License, Version 2.0](./license.txt)

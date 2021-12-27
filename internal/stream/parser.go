@@ -2,7 +2,7 @@ package stream
 
 import (
 	"fmt"
-	"github.com/cbuschka/go-edi/stream/types"
+	"github.com/edilib/go-edi/stream/types"
 	"io"
 )
 
