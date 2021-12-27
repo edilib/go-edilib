@@ -6,7 +6,7 @@
 
 * low level streaming
 * generic object model, dom
-* supports UNA segments
+* supports UN/EDIFACT
 
 ## Unsupported Features/ Limitations
 
