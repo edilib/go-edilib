@@ -1,4 +1,4 @@
-module github.com/edilib/go-edi
+module github.com/edilib/go-edilib
 
 go 1.16
 

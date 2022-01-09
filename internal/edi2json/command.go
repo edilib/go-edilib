@@ -3,8 +3,8 @@ package edi2json
 import (
 	"fmt"
 	"github.com/cbuschka/go-jsonstream"
-	"github.com/edilib/go-edi/dom"
-	"github.com/edilib/go-edi/dom/types"
+	"github.com/edilib/go-edilib/dom"
+	"github.com/edilib/go-edilib/dom/types"
 	"os"
 )
 

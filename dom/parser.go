@@ -2,9 +2,9 @@ package dom
 
 import (
 	"fmt"
-	"github.com/edilib/go-edi/dom/types"
-	"github.com/edilib/go-edi/stream"
-	streamTypes "github.com/edilib/go-edi/stream/types"
+	"github.com/edilib/go-edilib/dom/types"
+	"github.com/edilib/go-edilib/stream"
+	streamTypes "github.com/edilib/go-edilib/stream/types"
 	"io"
 )
 

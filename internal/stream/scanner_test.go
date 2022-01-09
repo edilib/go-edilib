@@ -2,7 +2,7 @@ package stream
 
 import (
 	"bytes"
-	"github.com/edilib/go-edi/stream/types"
+	"github.com/edilib/go-edilib/stream/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

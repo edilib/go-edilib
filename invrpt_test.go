@@ -1,8 +1,8 @@
 package edi
 
 import (
-	"github.com/edilib/go-edi/dom"
-	"github.com/edilib/go-edi/stream"
+	"github.com/edilib/go-edilib/dom"
+	"github.com/edilib/go-edilib/stream"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"

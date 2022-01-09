@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/edilib/go-edi/internal/edi2jsonln"
+	"github.com/edilib/go-edilib/internal/edi2jsonln"
 	"os"
 	"path/filepath"
 )

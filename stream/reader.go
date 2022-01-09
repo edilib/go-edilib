@@ -1,8 +1,8 @@
 package stream
 
 import (
-	iparser "github.com/edilib/go-edi/internal/stream"
-	"github.com/edilib/go-edi/stream/types"
+	iparser "github.com/edilib/go-edilib/internal/stream"
+	"github.com/edilib/go-edilib/stream/types"
 	"io"
 )
 

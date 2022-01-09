@@ -1,7 +1,7 @@
 package stream
 
 import (
-	"github.com/edilib/go-edi/stream/types"
+	"github.com/edilib/go-edilib/stream/types"
 )
 
 type ScannerToken struct {
