@@ -1,4 +1,4 @@
-package stream
+package scanner
 
 type Format struct {
 	componentDataElementSeperator rune
