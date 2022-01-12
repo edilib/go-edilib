@@ -1,4 +1,4 @@
-package edi
+package testsuite
 
 import (
 	"github.com/edilib/go-edilib/edifact"
