@@ -2,28 +2,27 @@ package scanner
 
 import "fmt"
 
-type EDITokenType string
+type ScannerTokenType string
 
 const (
-	UNA_SEGMENT                      EDITokenType = "UNA_SEGMENT"
-	SEGMENT_TAG                      EDITokenType = "SEGMENT_TAG"
-	REPETITION_SEPERATOR             EDITokenType = "REPETITION_SEPERATOR"
-	COMPONENT_DATA_ELEMENT_SEPERATOR EDITokenType = "COMPONENT_DATA_ELEMENT_SEPERATOR" // default :
-	DATA_ELEMENT_SEPERATOR           EDITokenType = "DATA_ELEMENT_SEPERATOR"           // default +
-	SEGMENT_TERMINATOR               EDITokenType = "SEGMENT_TERMINATOR"               // default '
-	VALUE                            EDITokenType = "VALUE"
-	EOF                              EDITokenType = "EOF"
-	ERROR                            EDITokenType = "ERROR"
+	UNA_SEGMENT                      ScannerTokenType = "UNA_SEGMENT"
+	REPETITION_SEPERATOR             ScannerTokenType = "REPETITION_SEPERATOR"
+	COMPONENT_DATA_ELEMENT_SEPERATOR ScannerTokenType = "COMPONENT_DATA_ELEMENT_SEPERATOR" // default :
+	DATA_ELEMENT_SEPERATOR           ScannerTokenType = "DATA_ELEMENT_SEPERATOR"           // default +
+	SEGMENT_TERMINATOR               ScannerTokenType = "SEGMENT_TERMINATOR"               // default '
+	VALUE                            ScannerTokenType = "VALUE"
+	EOF                              ScannerTokenType = "EOF"
+	ERROR                            ScannerTokenType = "ERROR"
 )
 
 type ScannerToken struct {
-	tType EDITokenType
+	tType ScannerTokenType
 	value string
 	pos   int
 	err   error
 }
 
-func (t EDITokenType) Name() string {
+func (t ScannerTokenType) Name() string {
 	return string(t)
 }
 
@@ -31,7 +30,7 @@ func (t *ScannerToken) String() string {
 	return fmt.Sprintf("type=%s,value=%s at <unknown>:0:%d", t.tType.Name(), t.Value(), t.pos)
 }
 
-func (t *ScannerToken) Type() EDITokenType {
+func (t *ScannerToken) Type() ScannerTokenType {
 	return t.tType
 }
 

@@ -24,8 +24,8 @@ type SegmentReader struct {
 	state    int
 }
 
-func NewSegmentReader(reader io.Reader) *SegmentReader {
-	segmentReader := SegmentReader{scanner: scanner.NewScanner(reader), segments: []types.Segment{}, state: INITIAL}
+func NewSegmentReader(reader io.Reader, format types.Format) *SegmentReader {
+	segmentReader := SegmentReader{scanner: scanner.NewScanner(reader, format), segments: []types.Segment{}, state: INITIAL}
 	return &segmentReader
 }
 
@@ -142,7 +142,7 @@ func (r *SegmentReader) processInitialState() error {
 }
 
 func (r *SegmentReader) unexpectedInput(token scanner.ScannerToken) error {
-	return fmt.Errorf("unexpected input")
+	return fmt.Errorf("unexpected input %s, value=%s at %d", token.Type().Name(), token.Value(), token.Pos())
 }
 
 func (r *SegmentReader) readUnaSegment() error {
@@ -158,12 +158,12 @@ func (r *SegmentReader) processInitialUnaSeenState() error {
 
 	switch token.Type() {
 	case scanner.UNA_SEGMENT:
-		return fmt.Errorf("duplicate una segment")
+		return fmt.Errorf("duplicate una segment at %d", token.Pos())
 	case scanner.VALUE:
 		r.state = IN_MESSAGE
 		return nil
 	case scanner.EOF:
-		return fmt.Errorf("no segments after una segment")
+		return fmt.Errorf("no segments after una segment found")
 	default:
 		return r.unexpectedInput(token)
 	}

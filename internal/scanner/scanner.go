@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"fmt"
+	"github.com/edilib/go-edilib/edifact/types"
 	"io"
 )
 
@@ -18,14 +19,14 @@ type Scanner struct {
 	state  state
 	scanRd *ScannerReader
 	tokens []ScannerToken
-	format Format
+	format types.Format
 }
 
-func NewScanner(reader io.Reader) *Scanner {
-	return &Scanner{state: INITIAL, scanRd: NewScannerReader(reader), tokens: []ScannerToken{}, format: DefaultFormat()}
+func NewScanner(reader io.Reader, format types.Format) *Scanner {
+	return &Scanner{state: INITIAL, scanRd: NewScannerReader(reader), tokens: []ScannerToken{}, format: format}
 }
 
-func (s *Scanner) Follows(tType EDITokenType) (bool, error) {
+func (s *Scanner) Follows(tType ScannerTokenType) (bool, error) {
 	token, err := s.Peek()
 	if err != nil {
 		return false, err
@@ -63,7 +64,7 @@ func (s *Scanner) All() ([]ScannerToken, error) {
 	return tokens, nil
 }
 
-func (s *Scanner) Consume(tType EDITokenType) (ScannerToken, error) {
+func (s *Scanner) Consume(tType ScannerTokenType) (ScannerToken, error) {
 	token, err := s.Next()
 	if err != nil {
 		return ScannerToken{}, err
@@ -113,13 +114,17 @@ func (s *Scanner) fill() error {
 			return err
 		}
 		if unaFollows {
+			if !s.format.UnaAllowed {
+				return fmt.Errorf("una segment not allowed at %d", pos)
+			}
+
 			value, err := s.scanRd.ReadNRunes(9)
 			if err != nil {
 				return err
 			}
 
 			s.tokens = append(s.tokens, ScannerToken{tType: UNA_SEGMENT, value: string(value), pos: pos, err: err})
-			s.format = Format{componentDataElementSeperator: value[3], dataElementSeperator: value[4], decimalMark: value[5], releaseCharacter: value[6], repetitionSeperator: value[7], segmentTerminator: value[8]}
+			s.format = types.Format{SkipNewLineAfterSegment: s.format.SkipNewLineAfterSegment, UnaAllowed: s.format.UnaAllowed, ComponentDataElementSeperator: value[3], DataElementSeperator: value[4], DecimalMark: value[5], ReleaseCharacter: value[6], RepetitionSeperator: value[7], SegmentTerminator: value[8]}
 			s.state = INITIAL_DATA_SEEN
 			return nil
 		}
@@ -138,22 +143,35 @@ func (s *Scanner) fill() error {
 			if err == io.EOF {
 				s.tokens = append(s.tokens, ScannerToken{tType: EOF, value: "", pos: pos, err: nil})
 				return nil
-			} else if b == s.format.releaseCharacter {
+			} else if b == s.format.ReleaseCharacter {
 				_, _ = s.scanRd.ReadRune()
 				s.state = IN_VALUE_RELEASE_SEEN
-			} else if b == s.format.segmentTerminator {
+			} else if b == s.format.SegmentTerminator {
 				b, _ := s.scanRd.ReadRune()
 				s.tokens = append(s.tokens, ScannerToken{tType: SEGMENT_TERMINATOR, value: string(b), pos: pos, err: nil})
+
+				if s.format.SkipNewLineAfterSegment {
+					next, err := s.scanRd.PeekRune(0)
+					if err != nil {
+						return err
+					}
+					if next == '\n' {
+						_, err := s.scanRd.ReadRune()
+						if err != nil {
+							return err
+						}
+					}
+				}
 				return nil
-			} else if b == s.format.componentDataElementSeperator {
+			} else if b == s.format.ComponentDataElementSeperator {
 				b, _ := s.scanRd.ReadRune()
 				s.tokens = append(s.tokens, ScannerToken{tType: COMPONENT_DATA_ELEMENT_SEPERATOR, value: string(b), pos: pos, err: nil})
 				return nil
-			} else if b == s.format.dataElementSeperator {
+			} else if b == s.format.DataElementSeperator {
 				b, _ := s.scanRd.ReadRune()
 				s.tokens = append(s.tokens, ScannerToken{tType: DATA_ELEMENT_SEPERATOR, value: string(b), pos: pos, err: nil})
 				return nil
-			} else if b == s.format.repetitionSeperator {
+			} else if b == s.format.RepetitionSeperator {
 				b, _ := s.scanRd.ReadRune()
 				s.tokens = append(s.tokens, ScannerToken{tType: REPETITION_SEPERATOR, value: string(b), pos: pos, err: fmt.Errorf("eof after release char")})
 				return nil
@@ -164,14 +182,14 @@ func (s *Scanner) fill() error {
 			}
 		case IN_VALUE:
 			if err == io.EOF ||
-				b == s.format.dataElementSeperator ||
-				b == s.format.componentDataElementSeperator ||
-				b == s.format.segmentTerminator ||
-				b == s.format.repetitionSeperator {
+				b == s.format.DataElementSeperator ||
+				b == s.format.ComponentDataElementSeperator ||
+				b == s.format.RepetitionSeperator ||
+				b == s.format.SegmentTerminator {
 				s.state = INITIAL
 				s.tokens = append(s.tokens, ScannerToken{tType: VALUE, value: string(buf), pos: pos, err: nil})
 				return nil
-			} else if b == s.format.releaseCharacter {
+			} else if b == s.format.ReleaseCharacter {
 				_, _ = s.scanRd.ReadRune()
 				s.state = IN_VALUE_RELEASE_SEEN
 			} else {

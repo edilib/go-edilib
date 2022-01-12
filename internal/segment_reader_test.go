@@ -9,7 +9,7 @@ import (
 
 func TestReadsSingleEmptySegment(t *testing.T) {
 	rd := strings.NewReader("UNB+'")
-	p := NewSegmentReader(rd)
+	p := NewSegmentReader(rd, types.UnEdifactFormat())
 	all, err := p.ReadAll()
 	if err != nil {
 		t.Fatal(err)
@@ -26,7 +26,7 @@ func TestReadsSingleEmptySegment(t *testing.T) {
 
 func TestReadsSingleSegmentWithSingleEmptySimpleDataElement(t *testing.T) {
 	rd := strings.NewReader("UNB+'")
-	p := NewSegmentReader(rd)
+	p := NewSegmentReader(rd, types.UnEdifactFormat())
 	all, err := p.ReadAll()
 	if err != nil {
 		t.Fatal(err)
@@ -43,7 +43,7 @@ func TestReadsSingleSegmentWithSingleEmptySimpleDataElement(t *testing.T) {
 
 func TestReadsSingleSegmentWithTwoEmptySimpleDataElements(t *testing.T) {
 	rd := strings.NewReader("UNB++'")
-	p := NewSegmentReader(rd)
+	p := NewSegmentReader(rd, types.UnEdifactFormat())
 	all, err := p.ReadAll()
 	if err != nil {
 		t.Fatal(err)
@@ -58,9 +58,10 @@ func TestReadsSingleSegmentWithTwoEmptySimpleDataElements(t *testing.T) {
 			types.SimpleValue{StringValue: ""},
 		}}}, all)
 }
+
 func TestReadsTwoSegmentWithTwoRepetitionDataElements(t *testing.T) {
 	rd := strings.NewReader("UNB+X*X2+Y*Y2'")
-	p := NewSegmentReader(rd)
+	p := NewSegmentReader(rd, types.UnEdifactFormat())
 	all, err := p.ReadAll()
 	if err != nil {
 		t.Fatal(err)
@@ -75,4 +76,12 @@ func TestReadsTwoSegmentWithTwoRepetitionDataElements(t *testing.T) {
 			types.RepetitionValue{Values: []types.SimpleValue{{StringValue: "Y"}, {StringValue: "Y2"}}},
 		}},
 	}, all)
+}
+
+func TestUnaNotAllowedWithX12(t *testing.T) {
+	rd := strings.NewReader("UNA...")
+	p := NewSegmentReader(rd, types.X12Format())
+	_, err := p.ReadAll()
+
+	assert.EqualError(t, err, "una segment not allowed at 0")
 }

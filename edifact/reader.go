@@ -8,6 +8,6 @@ import (
 
 // NewSegmentReader returns a new reader instance that can read EDI segments
 // from io reader.
-func NewSegmentReader(reader io.Reader) types.SegmentReader {
-	return internal.NewSegmentReader(reader)
+func NewSegmentReader(reader io.Reader, format types.Format) types.SegmentReader {
+	return internal.NewSegmentReader(reader, format)
 }

@@ -2,13 +2,14 @@ package scanner
 
 import (
 	"bytes"
+	"github.com/edilib/go-edilib/edifact/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestScansEOF(t *testing.T) {
 
-	s := NewScanner(bytes.NewReader([]byte{}))
+	s := NewScanner(bytes.NewReader([]byte{}), types.UnEdifactFormat())
 	tokens, err := s.All()
 	if err != nil {
 		t.Fatal(err)
@@ -21,7 +22,7 @@ func TestScansEOF(t *testing.T) {
 
 func TestScansSegmentTerminator(t *testing.T) {
 
-	s := NewScanner(bytes.NewReader([]byte("'")))
+	s := NewScanner(bytes.NewReader([]byte("'")), types.UnEdifactFormat())
 	tokens, err := s.All()
 	if err != nil {
 		t.Fatal(err)
@@ -35,7 +36,7 @@ func TestScansSegmentTerminator(t *testing.T) {
 
 func TestScansValue(t *testing.T) {
 
-	s := NewScanner(bytes.NewReader([]byte("ABC")))
+	s := NewScanner(bytes.NewReader([]byte("ABC")), types.UnEdifactFormat())
 	tokens, err := s.All()
 	if err != nil {
 		t.Fatal(err)
@@ -49,7 +50,7 @@ func TestScansValue(t *testing.T) {
 
 func TestScansValueWithReleaseChar(t *testing.T) {
 
-	s := NewScanner(bytes.NewReader([]byte("ABC?'")))
+	s := NewScanner(bytes.NewReader([]byte("ABC?'")), types.UnEdifactFormat())
 	tokens, err := s.All()
 	if err != nil {
 		t.Fatal(err)
@@ -63,7 +64,7 @@ func TestScansValueWithReleaseChar(t *testing.T) {
 
 func TestScansUNASegment(t *testing.T) {
 
-	s := NewScanner(bytes.NewReader([]byte("UNA:+.? !ABC!")))
+	s := NewScanner(bytes.NewReader([]byte("UNA:+.? !ABC!")), types.UnEdifactFormat())
 	tokens, err := s.All()
 	if err != nil {
 		t.Fatal(err)
@@ -79,7 +80,7 @@ func TestScansUNASegment(t *testing.T) {
 
 func TestScansUNASegmentSingleTimeOnly(t *testing.T) {
 
-	s := NewScanner(bytes.NewReader([]byte("UNA:+.? !UNA:+.? !")))
+	s := NewScanner(bytes.NewReader([]byte("UNA:+.? !UNA:+.? !")), types.UnEdifactFormat())
 	tokens, err := s.All()
 	if err != nil {
 		t.Fatal(err)

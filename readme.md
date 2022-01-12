@@ -1,21 +1,10 @@
 # go-edi - edifact reader written in golang
 
-### WIP!
-
 ## Features
 
-* low level streaming
-* generic object model, dom
-* supports UN/EDIFACT
-
-## Unsupported Features/ Limitations
-
-* dom does not support repetition seperators
-
-## Planned Features
-
-* writing
-* message type specific object models
+* reads generic edifact format
+* UN/EDIFACT support
+* X12 support
 
 ## References
 [reddit post about edi standards](https://www.reddit.com/r/edi/comments/3aazdc/eli5_edi/)
