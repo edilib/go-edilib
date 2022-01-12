@@ -10,15 +10,16 @@ type ScannerReader struct {
 	ioRd       *bufio.Reader
 	rdForClose io.Reader
 	ringBuf    *RuneRingBuffer
-	pos        int
+	line       int
+	column     int
 }
 
 func NewScannerReader(reader io.Reader) *ScannerReader {
-	return &ScannerReader{rdForClose: reader, ioRd: bufio.NewReader(reader), ringBuf: NewRuneRingBuffer(128), pos: 0}
+	return &ScannerReader{rdForClose: reader, ioRd: bufio.NewReader(reader), ringBuf: NewRuneRingBuffer(128), line: 0, column: 0}
 }
 
-func (s *ScannerReader) Position() int {
-	return s.pos
+func (s *ScannerReader) Position() (int, int) {
+	return s.line, s.column
 }
 
 func (s *ScannerReader) PeekRune(i int) (rune, error) {
@@ -68,7 +69,12 @@ func (s *ScannerReader) ReadRune() (rune, error) {
 	}
 
 	r, err := s.ringBuf.Remove()
-	s.pos = s.pos + utf8.RuneLen(r)
+	if r == '\n' {
+		s.line = s.line + 1
+		s.column = 0
+	} else {
+		s.column = s.column + utf8.RuneLen(r)
+	}
 
 	return r, err
 }

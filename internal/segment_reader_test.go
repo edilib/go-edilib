@@ -83,5 +83,5 @@ func TestUnaNotAllowedWithX12(t *testing.T) {
 	p := NewSegmentReader(rd, types.X12Format())
 	_, err := p.ReadAll()
 
-	assert.EqualError(t, err, "una segment not allowed at 0")
+	assert.EqualError(t, err, "una segment not allowed at 0:0")
 }

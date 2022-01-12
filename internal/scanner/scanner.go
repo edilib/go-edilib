@@ -107,7 +107,7 @@ func (s *Scanner) follows(str []rune) (bool, error) {
 
 func (s *Scanner) fill() error {
 
-	pos := s.scanRd.Position()
+	line, column := s.scanRd.Position()
 	if s.state == INITIAL {
 		unaFollows, err := s.follows([]rune("UNA"))
 		if err != nil {
@@ -115,7 +115,7 @@ func (s *Scanner) fill() error {
 		}
 		if unaFollows {
 			if !s.format.UnaAllowed {
-				return fmt.Errorf("una segment not allowed at %d", pos)
+				return fmt.Errorf("una segment not allowed at %d:%d", line, column)
 			}
 
 			value, err := s.scanRd.ReadNRunes(9)
@@ -123,7 +123,7 @@ func (s *Scanner) fill() error {
 				return err
 			}
 
-			s.tokens = append(s.tokens, ScannerToken{tType: UNA_SEGMENT, value: string(value), pos: pos, err: err})
+			s.tokens = append(s.tokens, ScannerToken{tType: UNA_SEGMENT, value: string(value), line: line, column: column, err: err})
 			s.format = types.Format{SkipNewLineAfterSegment: s.format.SkipNewLineAfterSegment, UnaAllowed: s.format.UnaAllowed, ComponentDataElementSeperator: value[3], DataElementSeperator: value[4], DecimalMark: value[5], ReleaseCharacter: value[6], RepetitionSeperator: value[7], SegmentTerminator: value[8]}
 			s.state = INITIAL_DATA_SEEN
 			return nil
@@ -134,21 +134,21 @@ func (s *Scanner) fill() error {
 	for {
 		b, err := s.scanRd.PeekRune(0)
 		if err != nil && err != io.EOF {
-			s.tokens = append(s.tokens, ScannerToken{tType: ERROR, value: "", pos: pos, err: err})
+			s.tokens = append(s.tokens, ScannerToken{tType: ERROR, value: "", line: line, column: column, err: err})
 			return nil
 		}
 
 		switch s.state {
 		case INITIAL, INITIAL_DATA_SEEN:
 			if err == io.EOF {
-				s.tokens = append(s.tokens, ScannerToken{tType: EOF, value: "", pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: EOF, value: "", line: line, column: column, err: nil})
 				return nil
 			} else if b == s.format.ReleaseCharacter {
 				_, _ = s.scanRd.ReadRune()
 				s.state = IN_VALUE_RELEASE_SEEN
 			} else if b == s.format.SegmentTerminator {
 				b, _ := s.scanRd.ReadRune()
-				s.tokens = append(s.tokens, ScannerToken{tType: SEGMENT_TERMINATOR, value: string(b), pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: SEGMENT_TERMINATOR, value: string(b), line: line, column: column, err: nil})
 
 				if s.format.SkipNewLineAfterSegment {
 					next, err := s.scanRd.PeekRune(0)
@@ -165,15 +165,15 @@ func (s *Scanner) fill() error {
 				return nil
 			} else if b == s.format.ComponentDataElementSeperator {
 				b, _ := s.scanRd.ReadRune()
-				s.tokens = append(s.tokens, ScannerToken{tType: COMPONENT_DATA_ELEMENT_SEPERATOR, value: string(b), pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: COMPONENT_DATA_ELEMENT_SEPERATOR, value: string(b), line: line, column: column, err: nil})
 				return nil
 			} else if b == s.format.DataElementSeperator {
 				b, _ := s.scanRd.ReadRune()
-				s.tokens = append(s.tokens, ScannerToken{tType: DATA_ELEMENT_SEPERATOR, value: string(b), pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: DATA_ELEMENT_SEPERATOR, value: string(b), line: line, column: column, err: nil})
 				return nil
 			} else if b == s.format.RepetitionSeperator {
 				b, _ := s.scanRd.ReadRune()
-				s.tokens = append(s.tokens, ScannerToken{tType: REPETITION_SEPERATOR, value: string(b), pos: pos, err: fmt.Errorf("eof after release char")})
+				s.tokens = append(s.tokens, ScannerToken{tType: REPETITION_SEPERATOR, value: string(b), line: line, column: column, err: fmt.Errorf("eof after release char")})
 				return nil
 			} else {
 				b, _ := s.scanRd.ReadRune()
@@ -187,7 +187,7 @@ func (s *Scanner) fill() error {
 				b == s.format.RepetitionSeperator ||
 				b == s.format.SegmentTerminator {
 				s.state = INITIAL
-				s.tokens = append(s.tokens, ScannerToken{tType: VALUE, value: string(buf), pos: pos, err: nil})
+				s.tokens = append(s.tokens, ScannerToken{tType: VALUE, value: string(buf), line: line, column: column, err: nil})
 				return nil
 			} else if b == s.format.ReleaseCharacter {
 				_, _ = s.scanRd.ReadRune()
@@ -198,7 +198,7 @@ func (s *Scanner) fill() error {
 			}
 		case IN_VALUE_RELEASE_SEEN:
 			if err == io.EOF {
-				s.tokens = append(s.tokens, ScannerToken{tType: ERROR, value: "", pos: pos, err: fmt.Errorf("eof after release char")})
+				s.tokens = append(s.tokens, ScannerToken{tType: ERROR, value: "", line: line, column: column, err: fmt.Errorf("eof after release char")})
 				return nil
 			} else {
 				_, _ = s.scanRd.ReadRune()

@@ -142,7 +142,7 @@ func (r *SegmentReader) processInitialState() error {
 }
 
 func (r *SegmentReader) unexpectedInput(token scanner.ScannerToken) error {
-	return fmt.Errorf("unexpected input %s, value=%s at %d", token.Type().Name(), token.Value(), token.Pos())
+	return fmt.Errorf("unexpected input %s, value=%s at %s", token.Type().Name(), token.Value(), token.Pos())
 }
 
 func (r *SegmentReader) readUnaSegment() error {
@@ -158,7 +158,7 @@ func (r *SegmentReader) processInitialUnaSeenState() error {
 
 	switch token.Type() {
 	case scanner.UNA_SEGMENT:
-		return fmt.Errorf("duplicate una segment at %d", token.Pos())
+		return fmt.Errorf("duplicate una segment at %s", token.Pos())
 	case scanner.VALUE:
 		r.state = IN_MESSAGE
 		return nil

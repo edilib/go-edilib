@@ -16,10 +16,11 @@ const (
 )
 
 type ScannerToken struct {
-	tType ScannerTokenType
-	value string
-	pos   int
-	err   error
+	tType  ScannerTokenType
+	value  string
+	line   int
+	column int
+	err    error
 }
 
 func (t ScannerTokenType) Name() string {
@@ -27,15 +28,15 @@ func (t ScannerTokenType) Name() string {
 }
 
 func (t *ScannerToken) String() string {
-	return fmt.Sprintf("type=%s,value=%s at <unknown>:0:%d", t.tType.Name(), t.Value(), t.pos)
+	return fmt.Sprintf("type=%s,value=%s at <unknown>@%s", t.tType.Name(), t.Value(), t.Pos())
 }
 
 func (t *ScannerToken) Type() ScannerTokenType {
 	return t.tType
 }
 
-func (t *ScannerToken) Pos() int {
-	return t.pos
+func (t *ScannerToken) Pos() string {
+	return fmt.Sprintf("%d:%d", t.line, t.column)
 }
 
 func (t *ScannerToken) Value() string {
