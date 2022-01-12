@@ -142,7 +142,7 @@ func (r *SegmentReader) processInitialState() error {
 }
 
 func (r *SegmentReader) unexpectedInput(token scanner.ScannerToken) error {
-	return fmt.Errorf("unexpected input %s, value=%s at %s", token.Type().Name(), token.Value(), token.Pos())
+	return fmt.Errorf("unexpected input %s, value=%s at %s", token.Type().Name(), token.StringValue(), token.Pos())
 }
 
 func (r *SegmentReader) readUnaSegment() error {
@@ -233,7 +233,7 @@ func (r *SegmentReader) readTag() (types.Tag, error) {
 	if err != nil {
 		return types.Tag{}, err
 	}
-	values = append(values, types.SimpleValue{StringValue: token.Value()})
+	values = append(values, types.SimpleValue{StringValue: token.StringValue(), IntegerValue: token.IntegerValue(), DecimalValue: token.DecimalValue()})
 	valueSeen := false
 
 	token, err = r.scanner.Peek()
@@ -260,11 +260,11 @@ func (r *SegmentReader) readTag() (types.Tag, error) {
 					return types.Tag{}, err
 				}
 
-				values = append(values, types.SimpleValue{StringValue: token.String()})
+				values = append(values, types.SimpleValue{StringValue: token.StringValue(), IntegerValue: token.IntegerValue(), DecimalValue: token.DecimalValue()})
 				valueSeen = true
 			case scanner.DATA_ELEMENT_SEPERATOR, scanner.COMPONENT_DATA_ELEMENT_SEPERATOR:
 				if !valueSeen {
-					values = append(values, types.SimpleValue{StringValue: ""})
+					values = append(values, types.SimpleValue{StringValue: "", IntegerValue: nil, DecimalValue: nil})
 				}
 				_, err := r.scanner.Consume(token.Type())
 				if err != nil {
@@ -273,7 +273,7 @@ func (r *SegmentReader) readTag() (types.Tag, error) {
 				valueSeen = false
 			case scanner.SEGMENT_TERMINATOR:
 				if !valueSeen {
-					values = append(values, types.SimpleValue{StringValue: ""})
+					values = append(values, types.SimpleValue{StringValue: "", IntegerValue: nil, DecimalValue: nil})
 				}
 			default:
 				return types.Tag{}, r.unexpectedInput(token)
@@ -332,11 +332,11 @@ func (r *SegmentReader) readDataElement() (types.Value, error) {
 				return nil, err
 			}
 
-			values = append(values, types.SimpleValue{StringValue: token.Value()})
+			values = append(values, types.SimpleValue{StringValue: token.StringValue(), IntegerValue: token.IntegerValue(), DecimalValue: token.DecimalValue()})
 			valueSeen = true
 		} else if (state == IN_SIMPLE_VALUE || state == IN_COMPOSITE_VALUE) && token.Type() == scanner.COMPONENT_DATA_ELEMENT_SEPERATOR {
 			if !valueSeen {
-				values = append(values, types.SimpleValue{StringValue: ""})
+				values = append(values, types.SimpleValue{StringValue: "", IntegerValue: nil, DecimalValue: nil})
 			}
 			state = IN_COMPOSITE_VALUE
 			valueSeen = false
@@ -346,7 +346,7 @@ func (r *SegmentReader) readDataElement() (types.Value, error) {
 			}
 		} else if (state == IN_SIMPLE_VALUE || state == IN_REPETITION_VALUE) && token.Type() == scanner.REPETITION_SEPERATOR {
 			if !valueSeen {
-				values = append(values, types.SimpleValue{StringValue: ""})
+				values = append(values, types.SimpleValue{StringValue: "", IntegerValue: nil, DecimalValue: nil})
 			}
 			state = IN_REPETITION_VALUE
 			valueSeen = false
@@ -356,7 +356,7 @@ func (r *SegmentReader) readDataElement() (types.Value, error) {
 			}
 		} else if token.Type() == scanner.DATA_ELEMENT_SEPERATOR || token.Type() == scanner.SEGMENT_TERMINATOR {
 			if !valueSeen {
-				values = append(values, types.SimpleValue{StringValue: ""})
+				values = append(values, types.SimpleValue{StringValue: "", IntegerValue: nil, DecimalValue: nil})
 			}
 			switch state {
 			case IN_SIMPLE_VALUE:

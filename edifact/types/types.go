@@ -1,5 +1,10 @@
 package types
 
+import (
+	"github.com/shopspring/decimal"
+	"math/big"
+)
+
 // Value is an value in the edifact context. It is used for Tag names, Tag components,
 // and DataElement values.
 type Value interface {
@@ -7,7 +12,9 @@ type Value interface {
 
 // SimpleValue is a simple value, e.g. a string.
 type SimpleValue struct {
-	StringValue string
+	StringValue  string
+	DecimalValue *decimal.Decimal
+	IntegerValue *big.Int
 }
 
 // CompositeValue represents an edifact value with component values. Also

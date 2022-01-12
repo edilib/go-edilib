@@ -1,6 +1,10 @@
 package scanner
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/shopspring/decimal"
+	"math/big"
+)
 
 type ScannerTokenType string
 
@@ -16,11 +20,13 @@ const (
 )
 
 type ScannerToken struct {
-	tType  ScannerTokenType
-	value  string
-	line   int
-	column int
-	err    error
+	tType        ScannerTokenType
+	stringValue  string
+	integerValue *big.Int
+	decimalValue *decimal.Decimal
+	line         int
+	column       int
+	err          error
 }
 
 func (t ScannerTokenType) Name() string {
@@ -28,7 +34,7 @@ func (t ScannerTokenType) Name() string {
 }
 
 func (t *ScannerToken) String() string {
-	return fmt.Sprintf("type=%s,value=%s at <unknown>@%s", t.tType.Name(), t.Value(), t.Pos())
+	return fmt.Sprintf("type=%s,value=%s at <unknown>@%s", t.tType.Name(), t.StringValue(), t.Pos())
 }
 
 func (t *ScannerToken) Type() ScannerTokenType {
@@ -39,10 +45,17 @@ func (t *ScannerToken) Pos() string {
 	return fmt.Sprintf("%d:%d", t.line, t.column)
 }
 
-func (t *ScannerToken) Value() string {
-	return t.value
+func (t *ScannerToken) StringValue() string {
+	return t.stringValue
 }
 
+func (t *ScannerToken) IntegerValue() *big.Int {
+	return t.integerValue
+}
+
+func (t *ScannerToken) DecimalValue() *decimal.Decimal {
+	return t.decimalValue
+}
 func (t *ScannerToken) Error() error {
 	return t.err
 }
